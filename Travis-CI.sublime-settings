@@ -1,0 +1,10 @@
+{
+	// Set an explicit path to the git binary.
+	// "git": "git",
+
+	// Set the name of the remote to retrieve build status for
+	"remote": "origin",
+
+	// Set the prefix for the build status line
+	"prefix": "Travis: "
+}
