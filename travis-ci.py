@@ -124,7 +124,7 @@ class TravisStatus(sublime_plugin.WindowCommand):
 				print('[Travis-CI API Error] ' + error.read().decode())
 
 		if status is None and settings.get('debug_enable', False):
-			print('[Travis-CI API Error] ' + repo + ' is not an active repository')
+			print('[Travis-CI API Error] ' + repo + ' is not an active repository on Travis')
 
 		return status
 
@@ -154,25 +154,34 @@ class TravisShowBuild(sublime_plugin.WindowCommand):
 		if local_repo is not None:
 			if isinstance(self.repos, dict) and local_repo in self.repos:
 				if isinstance(self.repos[local_repo], dict) and 'remote' in self.repos[local_repo]:
-					repo = self.get_repo(self.repos[local_repo]['remote'])
+					repo = travis.get_repo(self.repos[local_repo]['remote'])
 			else:
 				repo = local_repo
 
-		# Setup the base command
-		try:
-			base_command = self.get_base_command(selected_os[platform][browser], os_name)
-		except:
-			base_command = None
+		# Make sure this repo is active on Travis
+		status = travis.get_travis_status(repo)
 
-		# Setup the URL
-		travis_url = 'https://travis-ci.org/' + repo
+		if status is not None:
+			# Setup the base command
+			try:
+				base_command = self.get_base_command(selected_os[platform][browser], os_name)
+			except:
+				base_command = None
 
-		# Go!
-		if base_command is not None:
-			command = "%s %s" % (base_command, travis_url,)
-			self.open_browser(command, os_name)
+			# Setup the URL
+			travis_url = 'https://travis-ci.org/' + repo
+
+			# Go!
+			if base_command is not None:
+				command = "%s %s" % (base_command, travis_url,)
+				self.open_browser(command, os_name)
+			else:
+				command = webbrowser.open_new_tab(travis_url)
 		else:
-			command = webbrowser.open_new_tab(travis_url)
+			message = repo + ' is not an active repository on Travis'
+			sublime.message_dialog(message)
+			if settings.get('debug_enable', False):
+				print('[Travis-CI Command Error] ' + message)
 
 	##
 	# Returns the correct base command
