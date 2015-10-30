@@ -1,7 +1,7 @@
 {
 	// Debug logging
 	// If enabled, this dumps debugging data to the console
-	"debug_enable": true,
+	//"debug_enable": true,
 
 	// By default, we look for git in your environment path.
 	// If your git executable isn't in path, you can set an
