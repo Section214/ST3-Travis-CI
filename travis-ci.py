@@ -28,9 +28,6 @@ class EventListener(sublime_plugin.EventListener):
 	def on_activated_async(self, view):
 		self.update_status_bar(view)
 
-	#def update_status_bar(self, view):
-		#sublime.set_timeout_async(lambda: self._update_status_bar(view), 1000)
-
 	def update_status_bar(self, view):
 		if view.is_scratch() or view.settings().get('is_widget'):
 			return
@@ -42,7 +39,6 @@ class EventListener(sublime_plugin.EventListener):
 			view.set_status("(.0.travis-ci", status)
 		else:
 			view.erase_status("(.0.travis-ci")
-
 
 
 class TravisStatus(sublime_plugin.WindowCommand):
