@@ -1,10 +1,37 @@
 {
-	// Set an explicit path to the git binary.
-	// "git": "git",
+	// Debug logging
+	// If enabled, this dumps debugging data to the console
+	//"debug_enable": true,
 
-	// Set the name of the remote to retrieve build status for
-	"remote": "origin",
+	// By default, we look for git in your environment path.
+	// If your git executable isn't in path, you can set an
+	// absolute path here (but ask yourself why it isn't in
+	// your path in the first place!!!)
+	// "git": "/usr/bin/git",
 
-	// Set the prefix for the build status line
-	"prefix": "Travis: "
+	// Set the name of the default remote to retrieve build
+	// status for. If none is specified, the standard 'origin'
+	// is used.
+	//"default_remote": "origin",
+
+	// Set the prefix for the status line item
+	//"status_prefix": "Travis: ",
+
+	// Set the text for the status line item when the build
+	// is passing.
+	//"status_passing": "Passing",
+
+	// Set the text for the status line item when the build
+	// is failing.
+	//"status_failing": "Failing",
+
+	// Per-repo settings
+	// At the moment, the only per-repo setting is the
+	// 'remote' setting. Allows you to override the default
+	// remote defined above on a per-repo basis.
+	//"repos": {
+	//	"Section214/ST3-Travis-CI": {
+	//		"remote": "upstream"
+	//	}
+	//}
 }
