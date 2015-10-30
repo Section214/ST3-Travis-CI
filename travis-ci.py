@@ -50,8 +50,7 @@ class TravisStatus(sublime_plugin.WindowCommand):
 		remote = settings.get('default_remote', 'origin')
 		status = None
 
-		if settings.get('repos'):
-			self.repos = settings.get('repos', {})
+		self.repos = settings.get('repos', None)
 
 		local_repo = self.get_repo(remote)
 
