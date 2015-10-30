@@ -7,64 +7,114 @@ import json
 import webbrowser
 import urllib.request, urllib.error, urllib.parse
 
+
+##
+# Listens for various events and, when they
+# occur, runs the update rountine.
+##
 class EventListener(sublime_plugin.EventListener):
+	##
+	# Get things going
+	##
 	def __init__(self):
 		global settings
 		settings = sublime.load_settings('travis-ci.sublime-settings')
 
+	##
+	# Update when a new file is created
+	# Sounds silly, but it's used to clear the status
+	##
 	def on_new_async(self, view):
 		self.update_status_bar(view)
 
+	##
+	# Update when a file is cloned from an existing one
+	##
 	def on_clone_async(self, view):
 		self.update_status_bar(view)
 
+	##
+	# Update when a file opened
+	##
 	def on_load_async(self, view):
 		self.update_status_bar(view)
 
-	def on_pre_close(self, view):
+	##
+	# Update when a file is closed
+	##
+	def on_close(self, view):
 		self.update_status_bar(view)
 
+	##
+	# Update when a file is saved
+	##
 	def on_post_save_async(self, view):
 		self.update_status_bar(view)
 
+	##
+	# Update when a file comes into focus
+	##
 	def on_activated_async(self, view):
 		self.update_status_bar(view)
 
+	##
+	# Update the status bar!
+	##
 	def update_status_bar(self, view):
+		# There are times we don't want to update...
 		if view.is_scratch() or view.settings().get('is_widget'):
 			return
 
+		# Do all the Travis things!
 		travis = TravisStatus(sublime.active_window())
 		status = travis.run()
 
+		# Update the status bar
 		if status is not None:
 			view.set_status("(.0.travis-ci", status)
 		else:
 			view.erase_status("(.0.travis-ci")
 
 
+##
+# Handler for interacting with git repos and
+# the Travis API. This handles the bulk of the
+# work of the plugin, and is referenced in all
+# provided commands.
+##
 class TravisStatus(sublime_plugin.WindowCommand):
 
+	##
+	# Get things going
+	##
 	def run(self):
 		return self.check()
 
+	##
+	# Check the status of a given repo
+	# and update the status bar as necessary
+	##
 	def check(self):
 		remote = settings.get('default_remote', 'origin')
 		status = None
 
 		self.repos = settings.get('repos', None)
 
+		# Get the active branch of the current repo
 		local_repo = self.get_repo(remote)
 
 		if local_repo is not None:
+			# Maybe override the repo (if per-repo settings are set)
 			if isinstance(self.repos, dict) and local_repo in self.repos:
 				if isinstance(self.repos[local_repo], dict) and 'remote' in self.repos[local_repo]:
 					repo = self.get_repo(self.repos[local_repo]['remote'])
 			else:
 				repo = local_repo
 
+			# Get the status of the current repo on Travis
 			status = self.get_travis_status(repo)
 
+		# Return the status
 		if status is not None:
 			if status == 0:
 				status = settings.get('status_prefix', 'Travis: ') + settings.get('status_passing', 'Passing')
@@ -73,15 +123,23 @@ class TravisStatus(sublime_plugin.WindowCommand):
 
 		return status
 
+	##
+	# Get the git repo path for the repo
+	# we are currently viewing
+	##
 	def get_repo(self, remote):
+		# Get the name of the currently active file
 		file_name = self.window.active_view().file_name()
 		repo = None
 
 		if file_name is not None:
+			# Get the base path of the currently active file
+			# and change directories to it
 			file_path, file_name = os.path.split(file_name)
 			os.chdir(file_path)
 
 			try:
+				# Run git remote show <remote> and attempt to parse out the Fetch URL
 				matches = subprocess.check_output(['git', 'remote', 'show', remote]).strip()
 				matches = matches.decode('utf8', 'ignore').split("\n")
 
@@ -93,6 +151,7 @@ class TravisStatus(sublime_plugin.WindowCommand):
 					if len(fetch) > 1:
 						fetch = fetch[-1]
 
+				# Attempt to parse out the repo name from the Fetch URL
 				if isinstance(fetch, str) and fetch.find('.git', 0, len(fetch)) != -1:
 					repo = fetch.strip('.git')
 			except:
@@ -104,6 +163,10 @@ class TravisStatus(sublime_plugin.WindowCommand):
 
 		return repo
 
+	##
+	# Fetch the status for a given repo from
+	# the Travis API
+	##
 	def get_travis_status(self, repo):
 		status = None
 
