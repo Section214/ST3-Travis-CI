@@ -10,7 +10,7 @@ import urllib.request, urllib.error, urllib.parse
 class EventListener(sublime_plugin.EventListener):
 	def __init__(self):
 		global settings
-		settings = sublime.load_settings('Travis-CI.sublime-settings')
+		settings = sublime.load_settings('travis-ci.sublime-settings')
 
 	def on_new_async(self, view):
 		self.update_status_bar(view)
@@ -122,6 +122,9 @@ class TravisStatus(sublime_plugin.WindowCommand):
 		except Exception as error:
 			if settings.get('debug_enable', False):
 				print('[Travis-CI API Error] ' + error.read().decode())
+
+		if status is None and settings.get('debug_enable', False):
+			print('[Travis-CI API Error] ' + repo + ' is not an active repository')
 
 		return status
 
