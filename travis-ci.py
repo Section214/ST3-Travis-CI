@@ -153,7 +153,7 @@ class TravisStatus(sublime_plugin.WindowCommand):
 
 				# Attempt to parse out the repo name from the Fetch URL
 				if isinstance(fetch, str) and fetch.find('.git', 0, len(fetch)) != -1:
-					repo = fetch.strip('.git')
+					repo = fetch.replace('.git', '')
 			except:
 				if settings.get('debug_enable', False):
 					print('[Travis-CI Git Error] ' + file_path + ' is not a git repository')
